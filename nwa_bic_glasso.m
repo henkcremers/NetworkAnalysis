@@ -1,13 +1,26 @@
-function [conn bicdat] = nwa_bic_glasso(tsMat)
+function [conn bicdat] = nwa_bic_glasso(tsMat,varargin)
 %==========================================================================
 % USE
 %  IN
 %  OUT
 %  EXAMPLE
 % =========================================================================
-plotdat = 0;
+
+% defaults
+plotdat = false;
 lambda_range = [0.01:0.01:1];
-%lambda_range = [0.1:1];
+
+% input
+for i = 1:length(varargin)
+    arg = varargin{i};
+    if ischar(arg)
+        switch arg
+            case 'plot', plotdat = true;
+            case 'lambda', lambda_range = varargin{i+1};
+        end
+    end
+end
+
 nts  = size(tsMat,1);
 nvar = size(tsMat,2);
 for l = 1:length(lambda_range)
@@ -54,7 +67,7 @@ bicdat.bic = BIC;
 bicdat.LL = LL;
 
 % plot trajectory
-if plotdat == 1;
+if plotdat 
     figure
     plot(lambda_range(1:l),BIC)
     hold on

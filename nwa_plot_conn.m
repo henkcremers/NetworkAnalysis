@@ -15,7 +15,6 @@ for j = 1:nn;
     varnames{j} = ['variable' num2str(j)];
 end
 
-
 % user input
 %-----------
 for i = 1:length(varargin)

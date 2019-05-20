@@ -1,13 +1,27 @@
-function [conn bicdat] = bic_glasso(tsMat)
+function [conn bicdat] = nwa_bic_glasso(tsMat,varargin)
 %==========================================================================
 % USE
 %  IN
 %  OUT
 %  EXAMPLE
 % =========================================================================
+
+% defaults
 plotdat = 1;
-lambda_range = [0.01:0.05:1];
-%lambda_range = [0.1:1];
+lambda_range = [0.01:0.01:1];
+
+% input
+for i = 1:length(varargin)
+    arg = varargin{i};
+    if ischar(arg)
+        switch arg
+            case 'plot', plotdat = varargin{i+1};
+            case 'lambda', lambda_range = varargin{i+1};
+        end
+    end
+end
+
+
 nts  = size(tsMat,1);
 nvar = size(tsMat,2);
 for l = 1:length(lambda_range)
@@ -30,14 +44,15 @@ for l = 1:length(lambda_range)
     end
 end
 
-% bug fix if it doesnt coverge
-
-if minbic==length(lamda_range)_
-    
+% In case of a tie, pick the first
+s = size(theta_best);
+if length(s)>2
+   theta_best =  theta_best(:,:,1);
 end
 
 % Convert to partial correlations (see e.g. Cribben, 2013)
 % --------------------------------------------------------
+
 D = diag(theta_best);
 N = size(D,1);
 PrD1 = repmat(D,1,N);
