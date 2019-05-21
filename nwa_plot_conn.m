@@ -57,7 +57,8 @@ switch method
             % plot the matrix values
             for i = 1:nn;
                 for j = 1:nn;
-                    val = round(C(i,j),2);
+                    % val = round(C(i,j),2); bug
+                    val = round(C(j,i),2);
                     fcol = 'k';
                     if val<0.2; fcol = 'w'; end
                     text(i, j, num2str(val), 'FontSize', 12, 'Color', fcol);
