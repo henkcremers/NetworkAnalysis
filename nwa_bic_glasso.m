@@ -86,6 +86,10 @@ LL   = -(nvar/2)*crit;
 % Foygel, "Extended Bayesian Information Criteria for Gaussian Graphical
 % Models"
 bic = -2*LL+sum(E~=0)*log(nts);
+
+% -of sum(E)? (Foygel)
+% -nts of nvar, tijdpunten of aantal variablelen (matrix size)
+
 end
 
 

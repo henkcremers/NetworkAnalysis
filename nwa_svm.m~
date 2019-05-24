@@ -101,7 +101,7 @@ svmstats.Y = Y;
 progressbar_new(['running the SVM'])
 for i = 1:niter;
     progressbar_new(i/niter)
-    [stats svmMDl boostpred] = svm(X,Y,kfold,svmfunc);
+    [stats svmMDl] = svm(X,Y,kfold,svmfunc);
     
     evalm = fields(stats);
     for e = 1:length(evalm);
@@ -109,7 +109,7 @@ for i = 1:niter;
     end
     
     % boosting 
-    bdat(i,:) = boostpred;
+    bdat
     
     try
         ensmodel.bias(i)    = svmMdl.bias;
@@ -127,17 +127,6 @@ for e = 1:size(edat,1);
     svmstats = setfield(svmstats,evalm{e},'mean',nanmean(d));
     svmstats = setfield(svmstats,evalm{e},'CI95',prctile(d,[2.5 97.5]));
 end
-
-% boosting
-prob = sum(bdat==1)./niter;
-majority = double((prob>0.5))';
-boostacc = sum(majority==svmstats.Y)/nn;
-
-svmstats.boost.dat  = bdat;
-svmstats.boost.prob = prob';
-svmstats.boost.majority = majority;
-svmstats.boost.acc = boostacc;
-
 
 %% Permutation "null model
 
@@ -254,7 +243,7 @@ for e = 1:size(edat,1);
 end
 
 % main svm function
-    function [stats svmMDl boostpred] = svm(X,Y,kfold,svmfunc);
+    function [stats svmMDl] = svm(X,Y,kfold,svmfunc);
         svmMDl = [];
         
         % kfold cross validation
@@ -307,7 +296,7 @@ end
         stats.prec = mean(prec);
         stats.F1   = mean(F1);
         stats.bacc = mean(bacc);
-        % stats.bpred = boostpred;
+        stats.bpred = boostpred;
         
         % model summary
         try
