@@ -45,6 +45,7 @@ for i = 1:length(varargin)
         end
     end
 end
+%svmstats.feature 
 
 %% select the data
 selectdat = nwa_selectdata(NWA,'groups',compare,'contrast',con,'features',features);
@@ -81,7 +82,6 @@ if ~isempty(Conf);
             xC(:,l+1) = creg;
         end
     end
-    disp('we are here')
     svmstats.Conf.xC = xC;
     svmstats.Conf.Xunadj = X;
     for j = 1:nf
