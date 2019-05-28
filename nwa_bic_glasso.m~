@@ -9,7 +9,6 @@ function [conn bicdat] = nwa_bic_glasso(tsMat,varargin)
 % defaults
 plotdat = false;
 lambda_range = [0.01:0.01:1];
-pendiag = true;
 
 % input
 for i = 1:length(varargin)
@@ -18,7 +17,6 @@ for i = 1:length(varargin)
         switch arg
             case 'plot', plotdat = true;
             case 'lambda', lambda_range = varargin{i+1};
-            case 'pendiag',pendiag = varargin{i+1};    
         end
     end
 end
@@ -30,7 +28,7 @@ for l = 1:length(lambda_range)
     [w, theta] = GraphicalLasso(tsMat,lambda);
     c = cov(tsMat);
     % glasso in r uses the covariance for LL calculations. 
-    [bic,ll] = calcbic(theta,c,lambda,nts,pendiag);
+    [bic,ll] = calcbic(theta,c,lambda,nts,true);
     BIC(l) = bic;
     LL(l) = ll;
     theta_temp(:,:,l) = theta;
@@ -81,17 +79,23 @@ end
 end
 
 function [bic,LL] = calcbic(theta,w,lambda,nts,diag0)
-% https://www4.stat.ncsu.edu/~reich/BigData/code/glasso.html
 nvar = size(theta,1);
 E    = nwa_reshape(theta,'mat2vec');
-% optional: set diagonal to zero
+
+% set diagonal to zero
 if diag0
     temp = nwa_proc_conn(theta,'diag0');
 else
-    temp = theta;
+    temp = theta
 end
-crit = -log(det(theta))+trace(w*theta)+sum(sum(abs(lambda.*temp)));
+
+crit = -log(det(theta))+trace(w*theta)+sum(sum(abs(lambda.*theta)));
+%crit = -log(det(theta))+trace(w*theta)+sum(sum(abs(lambda.*temp)));
 LL   = -(nvar/2)*crit;
+% then BIC
+% based on: https://www4.stat.ncsu.edu/~reich/BigData/code/glasso.html
+% Foygel, "Extended Bayesian Information Criteria for Gaussian Graphical
+% Models"
 bic = -2*LL+sum(E~=0)*log(nts);
 end
 
