@@ -23,6 +23,7 @@ for i = 1:length(varargin)
     end
 end
 
+% start loop
 nts  = size(tsMat,1);
 nvar = size(tsMat,2);
 for l = 1:length(lambda_range)
@@ -48,14 +49,11 @@ for l = 1:length(lambda_range)
 end
 
 % In case of a tie, pick the first
-s = size(theta_best);
-if length(s)>2
-   theta_best =  theta_best(:,:,1);
+if length(size(theta_best))>2
+   theta_best = theta_best(:,:,1);
 end
 
-% Convert to partial correlations (see e.g. Cribben, 2013)
-% --------------------------------------------------------
-
+% Convert to partial correlations (e.g. Cribben, 2013)
 D = diag(theta_best);
 N = size(D,1);
 PrD1 = repmat(D,1,N);
@@ -63,7 +61,7 @@ PrD2 = repmat(D',N,1);
 conn = (-1*theta_best)./sqrt(PrD1.*PrD2);
 conn(logical(eye(N,N))) = 1;
 
-%% save the data
+% gather the output
 bicdat.minbic = minbic;
 bicdat.lambdabest = lambda_best;
 bicdat.lambdarange = lambda_range;
