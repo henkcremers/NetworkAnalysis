@@ -1,12 +1,12 @@
 function [eCorr cCorr compdat] = nwa_compare_connec(M1,M2,varargin);
 
-% Defaults
+% defaults
 % -----------------------
 matpart = {'ll'}; % lower (l) or upper (u) triangle of matrix.
 plotfig = false;  % plot figure(s)
 central = false;  % also test the centrality of the connectivity
 
-% User input
+% user input
 %-------------------------
 for i = 1:length(varargin)
     arg = varargin{i};
@@ -79,7 +79,7 @@ d2 = v2dat~=0;dens2 = sum(d2)/length(v2dat); compdat.dens2 = dens2;
 
 % network dice coef. 
 cd = [d1 d2];
-dc = (sum(sum(cd,2)>1)*2)/(sum(d1)+sum(d2));
+dc = sum(sum(cd,2)>1)*2)/(sum(d1)+sum(d2));
 compdat.dc = dc;
 
 if plotfig | plotfig== 1
