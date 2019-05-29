@@ -1,4 +1,4 @@
-function [ppinw] = nwa_ppi_final(PHYS,PSY,varargin)
+function [ppinw] = nwa_ppi(PHYS,PSY,varargin)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -160,23 +160,6 @@ for run = 1:nrun
         ppinw.run(run).phystest.var(1,n)  = vt; ppinw.run(run).phystest.var(2,n)  = vr;
         ppinw.run(run).phystest.skew(1,n) = st; ppinw.run(run).phystest.skew(2,n) = sr;
         ppinw.run(run).phystest.kurt(1,n) = kt; ppinw.run(run).phystest.kurt(2,n) = kr;
-        %         if p<0.05
-        %            warning(['region: ' num2str(n) ' shows diferent task/rest distribution']);
-        %         end
-        % plot the distribution
-        %         d1 = phys(taskloc);
-        %         d2 = phys(~taskloc);
-        %         minphys = min(phys);
-        %         maxphys = max(phys);
-        %         steps = ((maxphys-minphys)/(sum(taskloc)))*5;
-        %         b = minphys:steps:maxphys;
-        %         [h11 x11] = histc(d1,b);
-        %         [h12 x12] = histc(d2,b);
-        %         p = plot(b,h11,'r');
-        %         hold on
-        %         p = plot(b,h12,'--r');
-        %         title('Time-series distribution')
-        %         legend('task1','rest')
     end
     
     % add to structure
