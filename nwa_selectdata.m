@@ -71,11 +71,11 @@ if isstr(g1)
 else
     gnum = NWA.group.num;
     g1loc = find(gnum==g1);
-    Xg1 = svmdat(g1loc,:);
+    Xg1 = Xt(g1loc,:);
 
     g2loc = [];
     for j = 2:length(gcompare);
-        g2loc = [g2loc find(gnum==compare{j})];
+        g2loc = [g2loc find(gnum==gcompare{j})];
     end
     Xg2 = Xt(g2loc,:);
 end

@@ -46,7 +46,7 @@ for i = 1:length(varargin)
     end
 end
 %svmstats.feature 
-
+features
 %% select the data
 selectdat = nwa_selectdata(NWA,'groups',compare,'contrast',con,'features',features);
 svmstats.ftlabels = selectdat.ftlabels;
@@ -229,7 +229,7 @@ try
     svmstats.ensmodel.scale = mean(ensmodel.scale);
     svmstats.ensmodel.beta  = mean(ensmodel.beta);
     
-    % sanity check - remove later
+    % sanity check - fitting the ensemble model to the entire data. 
     Xz = zscore(X);
     Y_pred_raw = (Xz/svmstats.ensmodel.scale)*svmstats.ensmodel.beta'+svmstats.ensmodel.bias;
     pos = Y_pred_raw>0;
