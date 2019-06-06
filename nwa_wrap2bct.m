@@ -1,4 +1,4 @@
-function [NWA] = nwa_bct(NWA,varargin)
+function [NWA] = nwa_wrap2bct(NWA,varargin)
 
 %% data format
 if  iscell(NWA)

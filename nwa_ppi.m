@@ -148,6 +148,7 @@ for run = 1:nrun
             ppi = phys.*PSYrun(:,np);
             PPI(:,n,np)      = ppi;
         end
+        
         % compare the distribution
         physt = phys(taskloc); physr = phys(~taskloc);
         mt = mean(physt); mr = mean(physr);
