@@ -37,13 +37,14 @@ disp(max(max(st)))
 for i = 1:size(st,1);
 sthist(i,:) = histcounts(st(i,:),range);
 end
-plot(sthist','Color',colors{6,3});
+xvals = range(2:end);
+plot(xvals,sthist','Color',colors{6,3});
 
 % overlay averages per group
 hold on;
 for j = 1:ngroup;
     d= mean(sthist(NWA.group.num==j,:));
-    p(j) = plot(d,'Color',colors{j,1});
+    p(j) = plot(xvals,d,'Color',colors{j,1});
     g = NWA.group.name(NWA.group.num==j);
     label = g{1};
     if isnumeric(label); label = num2str(label); end

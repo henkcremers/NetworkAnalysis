@@ -129,9 +129,9 @@ for e = 1:size(edat,1);
 end
 
 % boosting
-prob = sum(bdat==1)./niter;
-majority = double((prob>0.5))';
-boostacc = sum(majority==svmstats.Y)/nn;
+% prob = sum(bdat==1)./niter;
+% majority = double((prob>0.5))';
+% boostacc = sum(majority==svmstats.Y)/nn;
 
 svmstats.boost.dat  = bdat;
 svmstats.boost.prob = prob';
