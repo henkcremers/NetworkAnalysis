@@ -46,13 +46,22 @@ for i = 1:length(varargin)
     end
 end
 %svmstats.feature 
-features
-%% select the data
-selectdat = nwa_selectdata(NWA,'groups',compare,'contrast',con,'features',features);
-svmstats.ftlabels = selectdat.ftlabels;
-svmstats.ftnum = selectdat.ftnum;
-X = selectdat.X;
-Y = selectdat.Y;
+% features
+
+%% eval input: NWA structure or X/Y for testing
+if isfield(NWA,'features')
+    %% select the data
+    selectdat = nwa_selectdata(NWA,'groups',compare,'contrast',con,'features',features);
+    svmstats.ftlabels = selectdat.ftlabels;
+    svmstats.ftnum = selectdat.ftnum;
+    X = selectdat.X;
+    Y = selectdat.Y;
+    
+else
+    X = NWA;
+    Y = varargin{1};
+end
+
 nn = size(X,1);
 nf = size(X,2);
 
@@ -133,10 +142,10 @@ end
 % majority = double((prob>0.5))';
 % boostacc = sum(majority==svmstats.Y)/nn;
 
-svmstats.boost.dat  = bdat;
-svmstats.boost.prob = prob';
-svmstats.boost.majority = majority;
-svmstats.boost.acc = boostacc;
+% svmstats.boost.dat  = bdat;
+% svmstats.boost.prob = prob';
+% svmstats.boost.majority = majority;
+% svmstats.boost.acc = boostacc;
 
 
 %% Permutation "null model
