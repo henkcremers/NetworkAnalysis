@@ -1,4 +1,4 @@
-function [eCorr cCorr compdat] = nwa_compare_connec(M1,M2,varargin);
+function [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
 
 % Defaults
 % -----------------------
