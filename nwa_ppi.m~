@@ -1,11 +1,14 @@
 function [ppinw] = nwa_ppi(PHYS,PSY,varargin)
 % ==================================================
-% ppi network analyses
+% [ppinw] = nwa_ppi(PHYS,PSY,varargin)
 % ==================================================
+% ppi network analyses
 % USE: [ppinw] = nwa_ppi(PHYS,PSY,varargin)
-% IN: PHYS - timeseries data
-%     PSY -  task regressors 
-% OUT: ppinw - data strucuture
+% IN: PHYS: timeseries data
+%     PSY:  task regressors 
+% O
+% 
+%
 % =================================================
 
 [nt nreg nrun] = size(PHYS);
