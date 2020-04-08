@@ -30,7 +30,7 @@ switch method
         
     case 'vec2mat'           
   
-         dataRes = squareform(data);      
+         dataRes = squareform(data); % check if this is correct! squareform uses the upper triangle..      
          
     case '3d2d'    
 

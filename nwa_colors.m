@@ -10,6 +10,7 @@ colors = {....,
     [255 20 147],[255 105 180],[255 182 193];...   % 7. pink
     [255 255 0],[255 255 51],[255 255 102];...     % 8. yellow
     };
+
 % rescale codes 
 [nr nc] = size(colors);
 for j = 1:nr; for i = 1:nc; colors{j,i} = colors{j,i}./256; end; end
@@ -68,6 +69,7 @@ for i = 1:grade;
 
 end
 cmap_hotcold = cmap_hotcold(2:62,:);
+% cmpa_hot = cmap_hotcold(,:);
 
 %% red-blue
 %if nargin < 1, m = size(get(gcf,'colormap'),1); end
@@ -90,8 +92,8 @@ m = 64;
 %     b = flipud(r);
 % end
 cmap_redblue = [r g b]; 
-
 cmap_redblueblack = cmap_redblue;
+cmap_red = cmap_redblue(32:end,:);
    
 %% markers 
 markers = {'o' 's' 'd'};

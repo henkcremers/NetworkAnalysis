@@ -49,13 +49,14 @@ end
 % features
 
 %% eval input: NWA structure or X/Y for testing
-if isfield(NWA,'features')
+if isfield(NWA,'data')
     %% select the data
     selectdat = nwa_selectdata(NWA,'groups',compare,'contrast',con,'features',features);
     svmstats.ftlabels = selectdat.ftlabels;
     svmstats.ftnum = selectdat.ftnum;
     X = selectdat.X;
     Y = selectdat.Y;
+    Conf = Conf(selectdat.index',:);
     
 else
     X = NWA;
@@ -68,9 +69,12 @@ nf = size(X,2);
 %% adjust X for potential confounders
 % xConf = NWA.site.num;
 if ~isempty(Conf);
-    if size(Conf,1)~=size(NWA.local.edges{1},1); Conf = Conf'; end
-    % xConf1 = xConf(g1loc,:); xConf2 = xConf(g2loc,:); xConf = [xConf1; xConf2];
-    Conf = Conf(selectdat.index',:);
+    if size(Conf,1)~=length(Y); Conf = Conf'; end
+%     % xConf1 = xConf(g1loc,:); xConf2 = xConf(g2loc,:); xConf = [xConf1; xConf2];
+%     try
+%     
+%     catch
+%     end
     xC = [];
     count = 0;
     
@@ -93,6 +97,7 @@ if ~isempty(Conf);
     end
     svmstats.Conf.xC = xC;
     svmstats.Conf.Xunadj = X;
+    % this can be done more easy...!! lukas/steven.
     for j = 1:nf
         s = regstats(X(:,j),xC);
         H(1,j) = s.fstat;
@@ -157,7 +162,7 @@ if nperm > 0 & svmstats.bacc.mean>0.6;
         progressbar_new(p/nperm)
         
         % permutation test
-        r = randperm(ndat);
+        r = randperm(length(Y));
         Yperm = Y(r);
         [stats svmMDl] = svm(X,Yperm,kfold,svmfunc);
         
@@ -263,13 +268,13 @@ for e = 1:size(edat,1);
 end
 
 % main svm function
-    function [stats svmMDl boostpred] = svm(X,Y,kfold,svmfunc);
-        svmMDl = [];
+    function [stats svmMdl boostpred] = svm(X,Y,kfold,svmfunc);
+        svmMdl = [];
         
         % kfold cross validation
-        ndat  = length(Y);
+        ny  = length(Y);
         CVP = cvpartition(Y,'kfold',kfold);
-        boostpred = zeros(ndat,1);
+        boostpred = zeros(ny,1);
         for k = 1:kfold;
             kloc = CVP.test(k);
             
