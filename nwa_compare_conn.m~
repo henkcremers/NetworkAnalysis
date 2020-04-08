@@ -1,19 +1,16 @@
 function [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
 % Compare two connectivity matrices M1 and M2
 % USE: [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
-% =========================================================================
 % IN: M1 - matrix 1 
 %     M2 - Matric2 
 % Optional:
 %     'matpart' - part of the tmatir 'l' or 'u' (lower/upper triangel)
-%     'plot' - plot the overalap 
-%     'central' -  also compare the node centrality
-% OUT: eCorr - element-wise spearman correlation 
-%      cCorr -  column wise spearman correlation
-%      compdat - some additional data. 
+% .   'plot' - plot the overalap 
+% .   'centra' -  also compare the node centrality
+% 
+% 
+
 % =========================================================================
-
-
 % Defaults
 % -----------------------
 matpart = {'ll'}; % lower (l) or upper (u) triangle of matrix.
