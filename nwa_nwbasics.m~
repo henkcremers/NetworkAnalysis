@@ -3,8 +3,9 @@ function [nwtable] = nwa_nwbasics(NWA)
 % USE: [nwtable] = nwa_nwbasics(NWA)
 % =========================================================================
 % IN: NWA structure
-% OUT: nwtable: table containing the Cluster Coefficient, Modularity,
-% global efficiency, mean eigenvector centrality, mean strength
+% OUT: nwtable: table cont
+% 
+% 
 % =========================================================================
 ngroup = length(unique(NWA.group.num));
 
