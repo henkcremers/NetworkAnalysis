@@ -11,6 +11,8 @@ function [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
 % OUT: eCorr - element-wise spearman correlation 
 %      cCorr -  column wise spearman correlation
 %      compdat - some additional data. 
+%
+%
 % =========================================================================
 
 
