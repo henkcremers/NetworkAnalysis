@@ -1,7 +1,16 @@
 function [dataRes] = nwa_reshape(data,method)
-% ==================================================
-% [dataRes] = nwa_reshape(data,method)
-% ==================================================
+% =========================================================================
+% Reshape matrix data
+% USE: [dataRes] = nwa_reshape(data,method)
+% =========================================================================
+% IN: data
+% method: 
+%     'mat2vec', matrix 2 vector, select the lower triangle
+%     'vec2mat', vector 2 matrix,
+%     '3d2d', 3d matrix to 2d. 
+%     '2d3d', 2d matrix to 3d. 
+%     'flipdiag', flip the lower and upper triangle
+% OUT: dataRes, reshape data
 %
 % EXAMPLES
 % 1) Switch between matrices and vectors
@@ -30,7 +39,8 @@ switch method
         
     case 'vec2mat'           
   
-         dataRes = squareform(data); % check if this is correct! squareform uses the upper triangle..      
+         dataRes = squareform(data); 
+         % squareform uses the upper triangle.. this only works for a symmetric matrix      
          
     case '3d2d'    
 

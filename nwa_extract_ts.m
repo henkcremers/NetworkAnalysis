@@ -1,10 +1,17 @@
 function [tsMat ddata] = nwa_extract_ts(image,roi,mask,varargin)
+% Extract time-series data from an (preprocessed) image. 
 % USE  [tsMat] = nwa_extract_ts(image,roi,mask,varargin)
 % works with 3d and 4d atlas and ROI data
 % =========================================================================
-% IN:   Detailed explanation goes here
+% IN:   
+%  image - a preprocessed nifto image. 
+%  roi - a brain region (binarized) or atlas structure (3D or 4D)
+%  mask - a mask image to read in the image data (this can be the same as
+%  the image)
 % OUT: 
-% EXAMPLE: 
+%  tsdat - time series data per region in the roi
+%  ddata - some diagnostic data
+% =========================================================================
 
 diagnose = 0;
 gmdata = [];
@@ -110,12 +117,9 @@ for n = 1:nreg
         ddata(n,2) = c;
 %        ddata(n,3) = sum(noGm)/sum(loc);
     end
-    
 end
 
-
 progressbar_new(1)
-    
 % for non-time serie data return all voxel values
 if nreg == 1; tsMat = regData; end
 

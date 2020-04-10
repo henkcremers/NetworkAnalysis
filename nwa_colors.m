@@ -1,4 +1,6 @@
-%% color coding for modules 
+%% color coding for modules and some color maps (cmaps)
+% =========================================================================
+
 % https://www.rapidtables.com/web/color/RGB_Color.html
 colors = {....,
     [0 100 0],[50 205 50],[144 238 144];...        % 1. green 
@@ -34,15 +36,15 @@ cmap_hotcold = ones(n,3);
 % red scale 
 for i = 1:grade;
     
-    % first ten 
+    % first 
     val = i/grade;
     cmap_hotcold(i,1) = 1-val+0.1;
     
-    % second ten
+    % second 
     cmap_hotcold(i+grade,1) = 0;
     cmap_hotcold(i+grade,2) = 1-val+0.1;
     
-    % third ten
+    % third 
     cmap_hotcold(i+2*grade,1) = 0;
     cmap_hotcold(i+2*grade,2) = 0;
     cmap_hotcold(i+2*grade,3) = 1-val+0.1;
@@ -52,7 +54,7 @@ for i = 1:grade;
     cmap_hotcold(mid,:)   = [0.1 0.1 0.1];
     cmap_hotcold(mid+1,:) = [0.1 0.1 0.1];
     
-    % first ten 
+    % fourth
     cmap_hotcold(33+i,1) = val;
     cmap_hotcold(33+i,2) = 0;
     cmap_hotcold(33+i,3) = 0;

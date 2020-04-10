@@ -1,5 +1,9 @@
-% format the data for BrainNet viewer
-function [] = nwa_4bnv2(C,varargin)
+function [] = nwa_wrap2bnv(C,varargin)
+% Wrapper function get a network matric into the format of the Brain
+% Network Viewer (BNV).
+% USE: nwa_wrap2bnv(C,varargin)
+% =========================================================================
+% =========================================================================
 
 nn = size(C,1);
 
@@ -67,7 +71,7 @@ switch dispmode
     case 'plotnw'       
     BrainNet_MapCfg(surf,nodefile,edgename,template)
     %BrainNet_MapCfg(surf,nodefile,edgename)
-
+    
     case 'setupnw'
     copyfile(surf,'.')
     BrainNet

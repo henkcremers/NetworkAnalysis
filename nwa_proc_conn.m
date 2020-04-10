@@ -1,8 +1,22 @@
 function [Cproc,diagnostic] = nwa_proc_conn(C,varargin)
-% ==================================================
-% [Cproc] = nwa_reshape(C,varargin)
-% EXAMPLES
-% =================================================
+% =========================================================================
+% Processing of a connectivity matrix
+% =========================================================================
+% USE: [Cproc,diagnostic] = nwa_proc_conn(C,varargin)
+% IN: C, connectivity matrix
+% processing steps
+%     'tresha', absolute threshold
+%     'treshr', relative threshold
+%     'bin', binarize 
+%     'abs', take the absolute
+%     'avesym', make the matrix symmetric by averaging values of 
+%              the lower and upper half
+%     'diag0', set the diagonal to zero
+%     'scale', sclae all values to a range of 0-1. 
+%
+% OUT: Cproc, processsed connectivity matrix
+%     diagnostic - some optional diagnostic info on the steps
+% =========================================================================
 nn = size(C);
 Cproc = C;
 diagnostic = [];
@@ -59,8 +73,8 @@ for i = 1:length(varargin)
 
                 % diagnostic = nanmean(cdiag);
                 % only incorporate the "relevant" (highest 5%) values. 
-                % THIS MAKES A BIG DIFFERENCE
-                Cs = nwa_procmat(Cproc,'threshr',0.05,'bin');
+                % this makes a big differences.. 
+                Cs = nwa_proc_conn(Cproc,'threshr',0.05,'bin');
                 csvec = logical(nwa_reshape(Cs,'mat2vec'));
                 diagnostic(1) = nanmean(cdiag(csvec));
                 

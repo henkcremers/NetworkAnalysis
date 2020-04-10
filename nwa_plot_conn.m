@@ -1,7 +1,19 @@
 function [] = nwa_plot_conn(C,varargin)
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
-
+% Basic plot of the connectivity matrix
+% USE: [conn bicdat] = nwa_bic_glasso(tsMat,varargin)
+% =========================================================================
+% IN: Connectivity matrix
+% 
+% optional: 
+%  'varnames', variable names
+%   'title', title for the plot
+%   'method', 
+%       'corplot' - heatmap of the correlation 
+%        'network' - very basic circular network plot
+%        'hist' - histogram of the network data
+%        'modsort' - sort nodes based on module assignment;
+%        'figure' - create a seperate figue
+% =========================================================================
 newfigure = 0;
 
 nn = size(C);
@@ -15,7 +27,7 @@ for j = 1:nn;
     varnames{j} = ['variable' num2str(j)];
 end
 
-% user input
+% input
 %-----------
 for i = 1:length(varargin)
     arg = varargin{i};

@@ -1,7 +1,10 @@
 function [selectdat] = nwa_selectdata(NWA,varargin)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
-
+% Select data of NWA structure
+% USE: selectdat = nwa_selectdata(NWA,varargin)
+% =========================================================================
+% IN: NWA 
+% OUT: subset of the NWA data
+% =========================================================================
 %% defaults 
 gcompare = {'BPD','NPC'};
 features = {'strength'};

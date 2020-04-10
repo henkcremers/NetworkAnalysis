@@ -3,7 +3,7 @@ function [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
 % USE: [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
 % =========================================================================
 % IN: M1 - matrix 1 
-%     M2 - Matric2 
+%     M2 - Matrix 2 
 % Optional:
 %     'matpart' - part of the tmatir 'l' or 'u' (lower/upper triangel)
 %     'plot' - plot the overalap 
@@ -11,7 +11,6 @@ function [eCorr cCorr compdat] = nwa_compare_conn(M1,M2,varargin);
 % OUT: eCorr - element-wise spearman correlation 
 %      cCorr -  column wise spearman correlation
 %      compdat - some additional data. 
-%
 %
 % =========================================================================
 

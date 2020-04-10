@@ -1,12 +1,24 @@
 function [ppinw] = nwa_ppi(PHYS,PSY,varargin)
-% ==================================================
+% =========================================================================
 % ppi network analyses
-% ==================================================
+% =========================================================================
 % USE: [ppinw] = nwa_ppi(PHYS,PSY,varargin)
 % IN: PHYS - timeseries data
 %     PSY -  task regressors 
+%   optional 
+%   'contrast', contrast vector or matrix
+%   'confound', - confounding regressors 
+%   'regression'
+%    correction with a AR(1) model (default). or select other: 
+%    'armodel', armodel =  varargin{i+1};
+%   'physadjust', correction method for the physiological data
+%   'psyadjust',  correction method for the psychological data
+%   'taskthr',  theshold to define the task 
+%   'taskbin', binarize task regressor
+%   'connest', connectivity estimation
+% 
 % OUT: ppinw - data strucuture
-% =================================================
+% =========================================================================
 
 [nt nreg nrun] = size(PHYS);
 [nc ndv nruncheck]  = size(PSY);
@@ -202,7 +214,7 @@ for run = 1:nrun
             Cr = corr(PHYSres);
             ppinw.run(run).conn.tscorr = Cr;
         case 'glasso'
-            connMat = nwa_connmat(PHYSres);
+            connMat = nwa_bic_glasso(PHYSres); 
             ppinw.run(run).conn.tsglasso = connMat;
     end
     

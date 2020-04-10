@@ -1,9 +1,16 @@
 function [conn bicdat] = nwa_bic_glasso(tsMat,varargin)
-%==========================================================================
-% USE
-%  IN
-%  OUT
-%  EXAMPLE
+% gLasso network estimation with the optimal lambda assessed with the
+% bayesian information criterion (bic).
+% USE: [conn bicdat] = nwa_bic_glasso(tsMat,varargin)
+% =========================================================================
+% IN: (time-series) data, time x nodes.
+%   optional: 
+%    'plot' - plot the trajectory
+%    'lambda' - range of lambda values
+%
+% OUT: 
+%   conn: connectivity matrix, converted to partial correlations
+%   bicdat: data on the lamdbda estimation.
 % =========================================================================
 
 % defaults

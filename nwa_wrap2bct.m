@@ -1,4 +1,11 @@
 function [NWA] = nwa_wrap2bct(NWA,varargin)
+% Wrapper function to apply the Brain Connectivity Toolbox (bcat)
+% USE: [NWA] = nwa_wrap2bct(NWA,varargin)
+% =========================================================================
+% IN: NWA - this can be a matrix, or a NWA strucutre containing the the
+% data (with a NWA.data field).
+% OUT: NWA structure
+% =========================================================================
 
 %% data format
 if  iscell(NWA)
