@@ -10,10 +10,10 @@ function [ppinw] = nwa_ppi(PHYS,PSY,varargin)
 %   'confound', - confounding regressors 
 %   'regression'
 %    correction with a AR(1) model (default). or select other: 
-%    'armodel', armodel =  varargin{i+1};
+%   'armodel', armodel =  varargin{i+1};
 %   'physadjust', correction method for the physiological data
 %   'psyadjust',  correction method for the psychological data
-%   'taskthr',  theshold to define the task 
+%   'taskthr', theshold to define the task 
 %   'taskbin', binarize task regressor
 %   'connest', connectivity estimation
 % 

@@ -1,5 +1,5 @@
 function [] = nwa_wrap2bnv(C,varargin)
-% Wrapper function get a network matric into the format of the Brain
+% Wrapper function get a network matrix into the format of the Brain
 % Network Viewer (BNV).
 % USE: nwa_wrap2bnv(C,varargin)
 % =========================================================================
