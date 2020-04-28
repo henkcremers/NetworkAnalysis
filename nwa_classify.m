@@ -1,20 +1,21 @@
-function [svmstats BaccIn BaccOut boostdat] = nwa_classify(NWA,varargin)
-% Classification through cross-validation of NWA data. 
+function [svmstats] = nwa_classify(NWA,varargin)
+% Classification through cross-validation of NWA data.
+% =========================================================================
 % USE: [svmstats BaccIn BaccOut boostdat] = nwa_classify(NWA,varargin)
-% IN: 
-%  
-% OUT: 
+% IN:
 %
+% OUT:
 %
-% TODO: 
-% - save parameters for nested cross-validation (ncv)
-% - permutation based testing for ncv
-% - bootstrap instead of itterations? 
-%
-%
-%% Defaults
-% ===============================================
-niter = 500;
+% Check/todo:
+% - data partioning
+% - bootstrapping - overestimation ?
+% - save all the model parameters vs. fit all data.. ?
+% - add the loop over multi-class here.
+% =========================================================================
+
+% Defaults
+% ----------------------
+rep = 500;
 nperm = 1000; %00;
 %features = {'strength'};
 %compare = {'BPD','NPC'};
@@ -24,7 +25,7 @@ conname = 'subject_contrast';
 subsam = false;
 Conf = [];
 confreg = 1; % 1 = overall regression, 2 = per fold.
-boost = 1;   % 
+repres = 'reg';
 
 % the deafult svm function and input arguments
 % --------------------------------------
@@ -44,7 +45,7 @@ for i = 1:length(varargin)
     if ischar(arg)
         switch arg
             case 'features', features = varargin{i+1};
-            case 'niter', niter = varargin{i+1};
+            case 'rep', rep = varargin{i+1};
             case 'nperm', nperm = varargin{i+1};
             case 'compare', compare = varargin{i+1};
             case 'con', con = varargin{i+1};
@@ -57,12 +58,11 @@ for i = 1:length(varargin)
         end
     end
 end
-%svmstats.feature
-% features
 
-%% eval input: NWA structure or X/Y for testing
+% eval input: NWA structure or X/Y for testing
+% --------------------------------------------
 if isfield(NWA,'features')
-    %% select the data
+    % select the data
     selectdat = nwa_selectdata(NWA,'groups',compare,'contrast',con,'features',features);
     svmstats.ftlabels = selectdat.ftlabels;
     svmstats.ftnum = selectdat.ftnum;
@@ -74,7 +74,8 @@ else
     Y = varargin{1};
 end
 
-% set-up the confound regressors - dummy code
+% set-up the confound regressors
+% ------------------------------
 if ~isempty(Conf);
     if size(Conf,1)~=length(Y); Conf = Conf'; end
     xC = [];
@@ -86,14 +87,8 @@ if ~isempty(Conf);
         U = unique(creg);
         if length(U)<5;
             warning('recoding into dummy variable');
-%             for nU = 1:(length(U)-1);
-%                 count = count +1;
-%                 dum = zeros(nn,1);
-%                 dum(creg==U(nU),1) = 1;
-%                 xC(:,count) = dum;
-%             end
-             D = dummyvar(Conf);
-             xC(:,1:(length(U)-1)) = D(:,1:(length(U)-1));
+            D = dummyvar(Conf);
+            xC(:,1:(length(U)-1)) = D(:,1:(length(U)-1));
         else
             l = size(xC,2);
             xC(:,l+1) = creg;
@@ -104,7 +99,7 @@ if ~isempty(Conf);
 end
 
 if confreg == 1 & ~isempty(Conf);
-% option 1 - regress out all together
+    % option 1 - regress out all together
     if iscell(X)
         nx = length(X);
         svmstats.Conf.Xunadj = X;
@@ -124,67 +119,84 @@ svmstats.Y = Y;
 %% Run the SVM
 % ======================================================
 progressbar_new(['running the classification'])
-boostdat.pred  = ones(length(Y),niter)*2;
-boostdat.model = zeros(length(Y),niter);
-for i = 1:niter;
-    progressbar_new(i/niter)
- 
-    % boosting - subsampling
-    % ----------------------
-    if boost
-        f = 0.9;
-        bsLoc = randsample(1:length(Y),round(f*length(Y)));
-        Ybs = Y(bsLoc);
+boostdat.pred  = ones(length(Y),rep)*2;
+boostdat.model = zeros(length(Y),rep);
+for i = 1:rep;
+    progressbar_new(i/rep)
+    
+    switch repres
         
-        if iscell(X)
-            nx = length(X);
-            for n = 1:nx
-                Xbs{n} = X{n}(bsLoc,:);
+        % regular
+        case 'reg'
+            Xi = X;
+            Yi = Y;
+            Conf_i = Conf;
+            
+            %[stats svmMDl bin bout Ypr_out Ypr_model] = svm(X,Y,kfold,svmfunc); %,Conf);
+            %             [stats svmMDl bin bout Ypr_out Ypr_model] = svm(X,Y,kfold,svmfunc); %,Conf);
+            %             % bdat(:,i) = pred;
+            %             boostdat.pred(:,i) = Ypr_out;
+            %             boostdat.model(:,i) = Ypr_model';
+            
+            % bootstrap
+        case 'boot'
+            [Xdump,idx] = datasample(X{1},size(X{1},1),'Replace',false);
+            for j = 1:length(X)
+                Xi{j} = X{j}(idx,:);
             end
-        else
-            Xbs = X(bsLoc,:);
-        end
-        % bdat(:,i) = ones(nn,1)*2;
-        [stats svmMDl bin bout Ypr_out Ypr_model] = svm(Xbs,Ybs,kfold,svmfunc); %,Conf);
-        boostdat.pred(bsLoc,i) = Ypr_out;
-        boostdat.model(bsLoc,i) = Ypr_model';
-    else
-        [stats svmMDl bin bout Ypr_out Ypr_model] = svm(X,Y,kfold,svmfunc); %,Conf);
-        % bdat(:,i) = pred;
-        boostdat.pred(:,i) = Ypr_out;
-        boostdat.model(:,i) = Ypr_model';
+            Yi = Y(idx);
+            Conf_i = Conf(idx,:);
+            
+            % boosting - subsampling
+        case 'boost'
+            f = 0.9;
+            bsLoc = randsample(1:length(Y),round(f*length(Y)));
+            Yi = Y(bsLoc);
+            
+            if iscell(X)
+                nx = length(X);
+                for n = 1:nx
+                    Xi{n} = X{n}(bsLoc,:);
+                end
+            else
+                Xbs = X(bsLoc,:);
+            end
+            Conf_i = Conf(bsloc,:);
+            % bdat(:,i) = ones(nn,1)*2;
     end
     
     
-%     % nested cv for multiple models.
-%     if confreg == 2 & ~isempty(Conf)
-%     [stats svmMDl bin bout Ypr_out Ypr_model] = svm(X,Y,kfold,svmfunc,Conf);
-%     else 
-%     [stats svmMDl bin bout Ypr_out Ypr_model] = svm(X,Y,kfold,svmfunc); 
-%     end
+    % nested cv for multiple models.
+    if confreg == 2 & ~isempty(Conf)
+        [stats baccin svmparm Ypr_out Ypr_model modemodel] = svm(Xi,Yi,kfold,svmfunc,Confi);
+    else
+        [stats baccin svmparm Ypr_out Ypr_model modemodel] = svm(Xi,Yi,kfold,svmfunc);
+    end
     
-    BaccIn(:,:,i) = bin;
-    BaccOut(i,:) = bout;
+    % save some data
+    svmstats.model.BaccIn(:,:,i)  = baccin;
+    svmstats.model.predict(:,i) = Ypr_out;
+    svmstats.model.models(:,i) = Ypr_model';
+    svmstats.model.win(:,i) = modemodel;
     
     evalm = fields(stats);
     for e = 1:length(evalm);
         edat(e,i) = getfield(stats,evalm{e});
     end
     
-    % boosting
-    % bdat(i,:) = boostpred;
     
     try
         for h = 1:length(X)
-        avemodel(h).bias(i)    = svmMDl(h).bias;
-        avemodel(h).scale(i)   = svmMDl(h).scale;
-        avemodel(h).beta(i,:)  = svmMDl(h).beta;
+            avemodel(h).bias(i)    = svmparm(h).bias;
+            avemodel(h).scale(i)   = svmparm(h).scale;
+            avemodel(h).beta(i,:)  = svmparm(h).beta;
         end
     catch
     end
 end
 
-%% add the data to structure.
+% add the data to structure.
+% --------------------------
 evalm = fields(stats);
 for e = 1:size(edat,1);
     d = edat(e,:);
@@ -278,20 +290,47 @@ end
 % ---------------
 try
     for h = 1:length(X)
-    svmstats.avemodel(h).bias  = mean(avemodel(h).bias);
-    svmstats.avemodel(h).scale = mean(avemodel(h).scale);
-    svmstats.avemodel(h).beta  = mean(avemodel(h).beta);
+        svmstats.avemodel(h).bias  = mean(avemodel(h).bias);
+        svmstats.avemodel(h).scale = mean(avemodel(h).scale);
+        svmstats.avemodel(h).beta  = mean(avemodel(h).beta);
     end
-    
-%     % sanity check - fitting the ensemble model to the entire data.
-%     Xz = zscore(X);
-%     Y_pred_raw = (Xz/svmstats.avemodel.scale)*svmstats.avemodel.beta'+svmstats.avemodel.bias;
-%     pos = Y_pred_raw>0;
-%     Y_test = zeros(length(Y_pred_raw),1);
-%     Y_test(pos) = 1;
-%     svmstats.avemodel.acc = 1-mean(abs(Y-Y_test));
+    %     % sanity check - fitting the ensemble model to the entire data.
+    %     Xz = zscore(X);
+    %     Y_pred_raw = (Xz/svmstats.avemodel.scale)*svmstats.avemodel.beta'+svmstats.avemodel.bias;
+    %     pos = Y_pred_raw>0;
+    %     Y_test = zeros(length(Y_pred_raw),1);
+    %     Y_test(pos) = 1;
+    %     svmstats.avemodel.acc = 1-mean(abs(Y-Y_test));
 catch
 end
+
+% compare against model fit of all data 
+
+% try
+    for h = 1:length(X)
+        
+        % train the model
+        Mdlfit = svmfunc(X{h},Y);
+        
+%         % save model parameters (only available for linear models)
+%         %                         try
+%         svmpar(nx).beta(kin,:)= Mdlfit.Beta;
+%         svmpar(nx).bias(kin)  = Mdl_in.Bias;
+%         svmpar(nx).scale(kin) = Mdl_in.KernelParameters.Scale;
+        
+        svmstats.modelfit(h).bias  = Mdlfit.Bias;
+        svmstats.modelfit(h).scale = Mdlfit.KernelParameters.Scale;
+        svmstats.modelfit(h).beta  = Mdlfit.Beta;
+        fit = predict(Mdlfit,X{h});
+        M = metrics(Y,fit);
+        svmstats.modelfit(h).bacc = M.bacc;
+    end
+    
+% catch
+% end
+
+
+
 
 %% print basic stats
 % ---------------------
@@ -309,12 +348,13 @@ for e = 1:size(edat,1);
 end
 
 % main classify function
-    function [stats svmparm bacc_in bacc_out Ypr_out Ypr_model] = svm(X,Y,kfold,svmfunc,varargin);
+    function [stats baccin svmparm Ypr_out Ypr_model modemodel] = svm(X,Y,kfold,svmfunc,varargin);
         svmparm = [];
-        bacc_in = [];
-
+        baccin = [];
+        modemodel = [];
+        
         if ~isempty(varargin); Ccv = varargin{1}; end
-
+        
         % kfold cross validation
         % ----------------------
         
@@ -329,10 +369,10 @@ end
             % split the data
             Ytrain_out = Y(~kout_loc,:);
             Ytest_out  = Y(kout_loc,:);
-             
+            
             if ~isempty(varargin);
-            Ctrain_out = Ccv(~kout_loc);
-            Ctest_out  = Ccv(kout_loc);
+                Ctrain_out = Ccv(~kout_loc);
+                Ctest_out  = Ccv(kout_loc);
             end
             
             if iscell(X)
@@ -355,7 +395,7 @@ end
                             Xtrain_in = Correct(Xtrain_in,Ctrain_in);
                             Xtest_in  = Correct(Xtest_in,Ctest_in);
                         end
-
+                        
                         Ytrain_in    = Ytrain_out(~kin_loc,:);
                         Ytest_in     = Ytrain_out(kin_loc,:);
                         
@@ -363,20 +403,20 @@ end
                         Mdl_in = svmfunc(Xtrain_in,Ytrain_in);
                         
                         % save model parameters (only available for linear models)
-%                         try
-                            svmpar(nx).beta(kin,:)= Mdl_in.Beta;
-                            svmpar(nx).bias(kin)  = Mdl_in.Bias;
-                            svmpar(nx).scale(kin) = Mdl_in.KernelParameters.Scale;
-%                         catch
-%                         end
+                        %                         try
+                        svmpar(nx).beta(kin,:)= Mdl_in.Beta;
+                        svmpar(nx).bias(kin)  = Mdl_in.Bias;
+                        svmpar(nx).scale(kin) = Mdl_in.KernelParameters.Scale;
+                        %                         catch
+                        %                         end
                         
                         % predict
                         pred_in = predict(Mdl_in,Xtest_in);
                         Ypr_in(kin_loc) = pred_in;
                         
                     end
-                    bacc = metrics(Ytrain_out,Ypr_in);
-                    model_bacc_in(nx) = bacc;
+                    M_in = metrics(Ytrain_out,Ypr_in);
+                    model_bacc_in(nx) = M_in.bacc;
                 end
                 
                 % pick the winning model.
@@ -385,8 +425,8 @@ end
                 Xtest_out  = X{wmodel}(kout_loc,:);
                 
                 % save the data for all models.
-                bacc_in(kout,:) = model_bacc_in;
-                model(kout) = wmodel; 
+                baccin(kout,:) = model_bacc_in;
+                model(kout) = wmodel;
             else
                 
                 Xtrain_out = X(~kout_loc,:);
@@ -394,55 +434,51 @@ end
                 
                 % correct
                 if ~isempty(varargin);
-                Xtrain_out = Correct(Xtrain_out,Ctrain_out);
-                Xtest_out  = Correct(Xtest_out,Ctest_out);
+                    Xtrain_out = Correct(Xtrain_out,Ctrain_out);
+                    Xtest_out  = Correct(Xtest_out,Ctest_out);
                 end
                 
             end
             
+            %             %feature selection - only pick the 10 best
+            %             bbest = svmpar(wmodel).beta(:,:);
+            %             bbest = mean(bbest);
+            %             [d bestloc] = sort(abs(bbest));
+            %             selectf = bestloc(end-10:end);
+            %             Xtrain_out = Xtrain_out(:,selectf);
+            %             Xtest_out = Xtest_out(:,selectf);
+            
             % train the winning model
             Mdl_out = svmfunc(Xtrain_out,Ytrain_out);
-            
-%             % save model parameters (only available for linear models)
-%             try
-%                 svmMdl.beta(k,:)= Mdl.Beta;
-%                 svmMdl.bias(k)  = Mdl.Bias;
-%                 svmMdl.scale(k) = Mdl.KernelParameters.Scale;
-%             catch
-%             end
             
             % prediction
             pred_out = predict(Mdl_out,Xtest_out);
             Ypr_out(kout_loc)=pred_out;
             
-            try
+            %try
             Ypr_model(kout_loc)=wmodel;
-            catch 
-            Ypr_model(kout_loc)=1;  
-            end
-
+            %catch
+            % Ypr_model(kout_loc)=1;
+            % end
             
         end
-        [bacc stats] = metrics(Y,Ypr_out);
-        bacc_out = bacc;
-        if iscell(X); stats.model = mode(model); end
-
+        stats = metrics(Y,Ypr_out);
+        % bacc_out = M_out.bacc;
+        if iscell(X); modemodel = mode(model); end
+        
         % model summary
         try
-        for j = 1:length(X)
-            svmparm(j).beta  = mean(svmpar(j).beta);
-            svmparm(j).bias  = mean(svmpar(j).bias);
-            svmparm(j).scale = mean(svmpar(j).scale);
-        end
-
+            for j = 1:length(X)
+                svmparm(j).beta  = mean(svmpar(j).beta);
+                svmparm(j).bias  = mean(svmpar(j).bias);
+                svmparm(j).scale = mean(svmpar(j).scale);
+            end
+            
         catch
         end
-    
- 
     end
 
-
-    function [bacc M] = metrics(Y,Yp)
+    function M = metrics(Y,Yp)
         % test evaluation features
         TP  = sum(Yp==1 & Y==1);
         FP  = sum(Yp==1 & Y==0);
@@ -450,14 +486,12 @@ end
         FN  = sum(Yp==0 & Y==1);
         tot = TP+FP+TN+FN;
         
-        %
         M.sens = TP/(TP+FN);
         M.spec = TN/(TN+FP);
         M.prec = TP/(TP+FP);
         M.F1   = 2*TP/(2*TP+FP+FN);
         M.acc  = (TP+TN)/tot;
         M.bacc = 0.5*(M.sens+M.spec);
-        bacc = M.bacc;
     end
 
     function Xc = Correct(X,Conf)
