@@ -1,7 +1,7 @@
 function [svmstats] = nwa_classify(NWA,varargin)
 % Classification through cross-validation of NWA data.
 % =========================================================================
-% USE: [svmstats BaccIn BaccOut boostdat] = nwa_classify(NWA,varargin)
+% USE: stats = nwa_classify(NWA,varargin)
 % IN:
 %
 % OUT:
@@ -10,7 +10,7 @@ function [svmstats] = nwa_classify(NWA,varargin)
 % - data partioning
 % - bootstrapping - overestimation ?
 % - save all the model parameters vs. fit all data.. ?
-% - add the loop over multi-class here.
+% - X single/multiple models.. 
 % =========================================================================
 
 % Defaults
@@ -87,7 +87,7 @@ if ~isempty(Conf);
         U = unique(creg);
         if length(U)<5;
             warning('recoding into dummy variable');
-            D = dummyvar(Conf);
+            D = dummyvar(creg);
             xC(:,1:(length(U)-1)) = D(:,1:(length(U)-1));
         else
             l = size(xC,2);
@@ -140,7 +140,7 @@ for i = 1:rep;
             
             % bootstrap
         case 'boot'
-            [Xdump,idx] = datasample(X{1},size(X{1},1),'Replace',false);
+            [Xdump,idx] = datasample(X{1},size(X{1},1),'Replace',true);
             for j = 1:length(X)
                 Xi{j} = X{j}(idx,:);
             end
@@ -177,7 +177,10 @@ for i = 1:rep;
     svmstats.model.BaccIn(:,:,i)  = baccin;
     svmstats.model.predict(:,i) = Ypr_out;
     svmstats.model.models(:,i) = Ypr_model';
+    try
     svmstats.model.win(:,i) = modemodel;
+    catch
+    end
     
     evalm = fields(stats);
     for e = 1:length(evalm);
@@ -206,7 +209,7 @@ for e = 1:size(edat,1);
 end
 
 
-%% Permutation "null model
+%% Permutation null model
 % --------------------------------
 % only run when its worth checking (e.g. svmstats.bacc.mean>0.6)
 ndat = length(Y);
@@ -247,9 +250,9 @@ end
 
 %% run the subsamples
 % ---------------------------------
-if subsam & svmstats.bacc.pval<0.05
-    subsam_n = 10;
-    subsam_frac = [0.5:0.1:1];
+if subsam %& svmstats.bacc.pval<0.05
+    subsam_n = 2;
+    subsam_frac = [0.5:0.1:0.6];
     count = 0;
     progressbar_new(['running the SVM subsampling'])
     for sl = 1:length(subsam_frac);
@@ -263,7 +266,12 @@ if subsam & svmstats.bacc.pval<0.05
             y0ss = randsample(y0,round(subsam_frac(sl)*length(y0)));
             locss = [y1ss; y0ss];
             Yss = Y(locss);
-            Xss = X(locss,:);
+            
+            %Xss = X(locss,:);
+            
+            for j = 1:length(X)
+                Xss{j} = X{j}(locss,:);
+            end
             
             [stats svmMDl] = svm(Xss,Yss,kfold,svmfunc);
             subsambacc(s,sl) = stats.bacc;
@@ -306,25 +314,25 @@ end
 
 % compare against model fit of all data 
 
-% try
-    for h = 1:length(X)
-        
-        % train the model
-        Mdlfit = svmfunc(X{h},Y);
-        
-%         % save model parameters (only available for linear models)
-%         %                         try
-%         svmpar(nx).beta(kin,:)= Mdlfit.Beta;
-%         svmpar(nx).bias(kin)  = Mdl_in.Bias;
-%         svmpar(nx).scale(kin) = Mdl_in.KernelParameters.Scale;
-        
-        svmstats.modelfit(h).bias  = Mdlfit.Bias;
-        svmstats.modelfit(h).scale = Mdlfit.KernelParameters.Scale;
-        svmstats.modelfit(h).beta  = Mdlfit.Beta;
-        fit = predict(Mdlfit,X{h});
-        M = metrics(Y,fit);
-        svmstats.modelfit(h).bacc = M.bacc;
-    end
+% % try
+%     for h = 1:length(X)
+%         
+%         % train the model
+%         Mdlfit = svmfunc(X{h},Y);
+%         
+% %         % save model parameters (only available for linear models)
+% %         %                         try
+% %         svmpar(nx).beta(kin,:)= Mdlfit.Beta;
+% %         svmpar(nx).bias(kin)  = Mdl_in.Bias;
+% %         svmpar(nx).scale(kin) = Mdl_in.KernelParameters.Scale;
+%         
+%         svmstats.modelfit(h).bias  = Mdlfit.Bias;
+%         svmstats.modelfit(h).scale = Mdlfit.KernelParameters.Scale;
+%         svmstats.modelfit(h).beta  = Mdlfit.Beta;
+%         fit = predict(Mdlfit,X{h});
+%         M = metrics(Y,fit);
+%         svmstats.modelfit(h).bacc = M.bacc;
+%     end
     
 % catch
 % end
@@ -439,15 +447,7 @@ end
                 end
                 
             end
-            
-            %             %feature selection - only pick the 10 best
-            %             bbest = svmpar(wmodel).beta(:,:);
-            %             bbest = mean(bbest);
-            %             [d bestloc] = sort(abs(bbest));
-            %             selectf = bestloc(end-10:end);
-            %             Xtrain_out = Xtrain_out(:,selectf);
-            %             Xtest_out = Xtest_out(:,selectf);
-            
+
             % train the winning model
             Mdl_out = svmfunc(Xtrain_out,Ytrain_out);
             
@@ -455,11 +455,11 @@ end
             pred_out = predict(Mdl_out,Xtest_out);
             Ypr_out(kout_loc)=pred_out;
             
-            %try
+            try
             Ypr_model(kout_loc)=wmodel;
-            %catch
-            % Ypr_model(kout_loc)=1;
-            % end
+            catch
+            Ypr_model(kout_loc)=1;
+            end
             
         end
         stats = metrics(Y,Ypr_out);

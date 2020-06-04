@@ -12,10 +12,25 @@ colors = {....,
     [255 20 147],[255 105 180],[255 182 193];...   % 7. pink
     [255 255 0],[255 255 51],[255 255 102];...     % 8. yellow
     };
+% also check: 
+% https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
+
+
+% colors that match (a bit) with fsl eyes
+fslcolors = {...,
+    [49 163 84];...   % yellow 
+    [232 64 170];... % pink
+    [250 218 94];...  % yellow
+    [158 202 225];... % Blue
+    };
 
 % rescale codes 
 [nr nc] = size(colors);
 for j = 1:nr; for i = 1:nc; colors{j,i} = colors{j,i}./256; end; end
+
+% rescale codes 
+[nr nc] = size(fslcolors);
+for j = 1:nr; for i = 1:nc; fslcolors{j,i} = fslcolors{j,i}./256; end; end
 
 %%  plot the colors
 % colordat = ones(nc,nr);
